@@ -1,0 +1,7 @@
+server/.env
+node_modules
+*.log
+.DS_Store
+./db.json
+.idea
+./package-lock.json
