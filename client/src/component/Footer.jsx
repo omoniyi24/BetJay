@@ -1,36 +1,29 @@
 import React from 'react'
 
+ const handlePlaceBet = ({ horses }) => {
+     console.log(horses)
+ }
+
 function Footer({horses}) {
     let profit = calcProfit(horses);
     let totalBet = calcBet(horses);
     return (
-        <>
-            <div className='submit'>
-                <div className='logo'>
-                    <p>
-                        Bet <span>2022</span>
-                    </p>
-                </div>
+        <div className="submit">
+            <div className="logo">
+                <p>Bet<span>Jay</span></p>
             </div>
-
-            <div className='options'>
+            <div className="options">
                 <div>
-                    <div>
-                        Max Potential Return
-                        <div className='max'>{profit}</div>
-                    </div>
+                    <div>Max Potential Return</div>
+                    <div className="max">#{profit}</div>
                 </div>
-            </div>
-            <div >
                 <div>
-                    Total Bet Amount
-                    <div className='total'>
-                        Max Potential Return
-                    </div>
+                    <div>Total Bet Amount</div>
+                    <div className="total">#{totalBet}</div>
                 </div>
+                <button onClick={() => handlePlaceBet(horses)}> Place Bet </button>
             </div>
-            <button>Place Bet</button>
-        </>
+        </div>
     );
 
 }
@@ -38,7 +31,6 @@ function Footer({horses}) {
 export default Footer
 
 function calcBet(horses) {
-    console.log("khjgjkgj",horses)
     let totalBet = 0;
     horses.forEach(horse => {
         totalBet += horse.amount;

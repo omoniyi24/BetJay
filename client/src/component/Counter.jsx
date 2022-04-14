@@ -3,25 +3,19 @@ import PropTypes from 'prop-types'
 
 function Counter({horse, onBetChange}) {
 
-
-    // console.log(">>>1", horse);
-    // console.log(">>>2", onBetChange(horse.id+1, -5));
     return (
 
         <section className='betting'>
             <div className='choice'>
-                <button onClick={() => onBetChange(horse.id, 5)} className="up">+</button>
-                <button onClick={() => {if (horse.amount >= 5) {onBetChange(horse.id, -5);}} } className="down">-</button>
+                <button className="up" onClick={() => onBetChange(horse.id, 5)} >+</button>
+                <button  className="down" onClick={() => {if (horse.amount >= 5) {onBetChange(horse.id, -5);}} }>-</button>
             </div>
-            <div className='amount'>
-                {horse.amount}
-            </div>
-
+            <div className="amount">#{horse.amount}</div>
         </section>
     );
 }
 
 export default Counter
 
-// Counter.prototype = {
+// Counter.propTypes = {
 //     onChange: React.PropTypes.func.isRequired };

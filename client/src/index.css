@@ -8,7 +8,7 @@
 html {
     font-size: 20px;
     font-family: "Cabin", sans-serif;
-    color: #191919;
+    /*color: #191919;*/
     text-align: center;
 }
 @media (max-width: 350px) {

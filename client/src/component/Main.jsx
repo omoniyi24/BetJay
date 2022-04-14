@@ -7,33 +7,32 @@ import Horse from "./Horse";
 
 function Main() {
     const [horses, setHorses] = useState([{
-        name: 'Red Room',
-        odds: '1/5',
+        name: '1ML',
+        odds: '0.5',
         id: 1,
-        amount: 50 },
+        amount: 0 },
         {
-            name: 'TeaBiscuit',
-            odds: '2/1',
+            name: 'Fiatjaf',
+            odds: '0.25',
             id: 2,
-            amount: 10 },
+            amount: 0 },
         {
-            name: 'Black Betty',
-            odds: '5/2',
+            name: 'hashXP',
+            odds: '2.5',
             id: 3,
-            amount: 30 },
+            amount: 0 },
         {
-            name: 'Sher-Khan',
-            odds: '6/1',
+            name: 'Amboss Space',
+            odds: '6.0',
             id: 4,
-            amount: 40 },
+            amount: 0 },
         {
-            name: "L'il Sebastian",
-            odds: '50/1',
+            name: "ACINQ",
+            odds: '25.0',
             id: 5,
             amount: 0 }])
 
     function onBetChange(index, change) {
-        console.log(">>>>", horses[index-1])
         // horses[index-1].amount += change;
         let arr = [...horses, horses[index-1].amount+= change]
         let anotherArr = arr.pop()
@@ -49,9 +48,8 @@ function Main() {
                 {horses.map((horse, index) => (
                     <Horse key={horse.id} horse={horse}  onBetChange={onBetChange}/>
                 ))}
-                <Footer horses={horses} />
-
             </div>
+            <Footer horses={horses} />
         </div>
     );
 
