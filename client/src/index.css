@@ -1,0 +1,178 @@
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+    border: 0px solid red;
+}
+
+html {
+    font-size: 20px;
+    font-family: "Cabin", sans-serif;
+    color: #191919;
+    text-align: center;
+}
+@media (max-width: 350px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+h1 {
+    font-family: "Roboto", sans-serif;
+    background-color: #06C5E9;
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+}
+
+.app {
+    overflow: auto;
+    position: relative;
+    top: -10px;
+    left: 0px;
+}
+.app:before {
+    content: "";
+    position: fixed;
+    left: -10px;
+    right: 0;
+    z-index: -1;
+    display: block;
+    background-color: #1a2930;
+    background-image: url("https://images.unsplash.com/photo-1475539175801-4f770d7d1a49?dpr=1&auto=format&fit=crop&w=1500&h=801&q=80&cs=tinysrgb&crop=");
+    background-blend-mode: multiply;
+    background-size: cover;
+    width: 110%;
+    height: 110%;
+    filter: blur(5px);
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #191919;
+    border-radius: 30px;
+}
+
+.bet-container {
+    width: 95%;
+    padding: 10px;
+    margin: 20px auto 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.horse {
+    display: flex;
+    align-items: center;
+    background: #06C5E9;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+.name {
+    width: 50%;
+}
+
+.odds {
+    width: 15%;
+}
+
+.betting {
+    display: flex;
+    align-items: center;
+    width: 35%;
+    justify-content: space-around;
+}
+
+.choice {
+    display: flex;
+    flex-direction: column;
+}
+.choice > button {
+    width: 50px;
+    color: white;
+    cursor: pointer;
+}
+.choice .up {
+    background: green;
+}
+.choice .up:hover {
+    background: #00b300;
+}
+.choice .down {
+    background: #ff0000;
+}
+.choice .down:hover {
+    background: #ff6666;
+}
+
+.amount {
+    width: 50px;
+}
+
+.submit {
+    max-width: 550px;
+    display: flex;
+    padding: 10px;
+    margin: 10px auto 50px;
+}
+@media (max-width: 450px) {
+    .submit {
+        font-size: 0.8rem;
+    }
+}
+
+.options {
+    width: 100%;
+    float: right;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    flex-direction: column;
+    color: white;
+}
+.options > div,
+.options button {
+    display: flex;
+    justify-content: flex-end;
+}
+.options .max {
+    margin: 0 0 0 10px;
+}
+.options .total {
+    margin: 0 0 0 10px;
+}
+.options button {
+    color: white;
+    border-radius: 5px;
+    width: 100px;
+    background: green;
+    float: right;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.logo {
+    display: flex;
+    color: white;
+    padding: 0;
+    margin: 0;
+    float: left;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 2rem;
+}
+@media (max-width: 450px) {
+    .logo {
+        font-size: 1.5rem;
+    }
+}
+@media (max-width: 350px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+}
+.logo span {
+    color: #06C5E9;
+}
