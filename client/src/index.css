@@ -8,7 +8,7 @@
 html {
     font-size: 20px;
     font-family: "Cabin", sans-serif;
-    color: #191919;
+    /*color: #191919;*/
     text-align: center;
 }
 @media (max-width: 350px) {
@@ -60,6 +60,19 @@ h1 {
     margin: 20px auto 0;
     display: flex;
     flex-direction: column;
+}
+
+.wallet-balance {
+    color: #06C5E9;
+}
+
+.fund-wallet {
+    color: white;
+    border-radius: 5px;
+    width: 100px;
+    background: green;
+    padding: 5px;
+    cursor: pointer;
 }
 
 .horse {

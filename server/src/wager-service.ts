@@ -7,6 +7,7 @@ export interface Wager {
     id: number;
     name: string;
     email: string;
+    walletBalance: number;
 }
 
 export interface DbData {
@@ -23,7 +24,7 @@ export const WagerEvents = {
 /**
  * A very simple file-based DB to store the Wager
  */
-export class Wager extends EventEmitter {
+export class WagerService extends EventEmitter {
 
     // in-memory database
     private _data: DbData = {
@@ -38,6 +39,32 @@ export class Wager extends EventEmitter {
     getWagerById(wagerId: number) {
         return this.getAllWagers().find(wager => wager.id === wagerId);
     }
+
+    async createWager(name: string, email: string) {
+        const maxId = Math.max(0, ...this._data.wagers.map(p => p.id));
+
+        const wager: Wager = {id: maxId + 1, name: name, email: email, walletBalance: 0};
+        this._data.wagers.push(wager);
+
+        await this.persist();
+        this.emit(WagerEvents.updated, wager);
+        return wager;
+    }
+
+    updateWager(wagerId: number, name: string, email: string, walletBalance: number) {
+        const wager = this._data.wagers.find(p => p.id === wagerId);
+        if (!wager) {
+            throw new Error('Wager not found');
+        }
+        wager.email = email
+        wager.name = name
+        wager.walletBalance = walletBalance
+        // post.votes++;
+        this.persist();
+        this.emit(WagerEvents.updated, wager);
+        return this.getWagerById(wagerId)
+    }
+
 
 
     async addWager(wager: Wager) {
@@ -76,4 +103,4 @@ export class Wager extends EventEmitter {
 }
 
 
-export default new Wager();
+export default new WagerService();
