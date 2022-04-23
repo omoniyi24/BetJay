@@ -2,7 +2,6 @@ import { EventEmitter } from 'events';
 import { existsSync, promises as fs } from 'fs';
 import {node} from "./node";
 import nodeManager from "./node-manager";
-import {SendRequest} from "@radar/lnrpc/types/lnrpc";
 
 const DB_FILE = '../db.json';
 

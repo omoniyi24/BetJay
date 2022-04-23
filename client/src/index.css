@@ -8,7 +8,7 @@
 html {
     font-size: 20px;
     font-family: "Cabin", sans-serif;
-    color: #191919;
+    /*color: #191919;*/
     text-align: center;
 }
 @media (max-width: 350px) {
@@ -19,7 +19,7 @@ html {
 
 h1 {
     font-family: "Roboto", sans-serif;
-    background-color: #06C5E9;
+    background-color: green;
     color: white;
     padding: 10px;
     border-radius: 10px 10px 0 0;
@@ -62,10 +62,23 @@ h1 {
     flex-direction: column;
 }
 
+.wallet-balance {
+    color: green;
+}
+
+.fund-wallet {
+    color: white;
+    border-radius: 5px;
+    width: 100px;
+    background: green;
+    padding: 5px;
+    cursor: pointer;
+}
+
 .horse {
     display: flex;
     align-items: center;
-    background: #06C5E9;
+    background: green;
     border-radius: 10px;
     margin: 5px 0;
 }
@@ -95,7 +108,7 @@ h1 {
     cursor: pointer;
 }
 .choice .up {
-    background: green;
+    background: darkgreen;
 }
 .choice .up:hover {
     background: #00b300;
@@ -174,5 +187,5 @@ h1 {
     }
 }
 .logo span {
-    color: #06C5E9;
+    color: green;
 }

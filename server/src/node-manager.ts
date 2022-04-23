@@ -55,7 +55,7 @@ class NodeManager extends EventEmitter {
       await rpc.verifyMessage({ msg, signature });
 
       // verify we have permissions to create a 1sat invoice
-      const { rHash } = await rpc.addInvoice({ value: '1', memo: 'Test invoice creation', expiry: '15' });
+      const { rHash } = await rpc.addInvoice({ value: '1', memo: 'Test BetJay invoice', expiry: '15' });
 
       // verify we have permission to lookup invoices
       await rpc.lookupInvoice({ rHash });

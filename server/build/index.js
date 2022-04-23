@@ -36,7 +36,6 @@ app.get('/api/node/:publicKey', (req, res) => {
     res.json({ data: nodeByPubkey });
 });
 app.post('/api/nodes', (req, res) => {
-    console.log("Heyeyeyyee");
     const { host, cert, macaroon } = req.body;
     if (!host || !cert || !macaroon) {
         throw new Error('Fields host, cert and macaroon are required to make a employee');
