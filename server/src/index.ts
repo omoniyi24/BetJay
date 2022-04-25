@@ -1,13 +1,21 @@
-import express from 'express';
+import express, {response} from 'express';
 import env from './env';
 import { node, initNode } from './node';
 import nodeService, {LndNode} from './node-service';
 import nodeManager from "./node-manager";
 import wagerService, {WagerService} from "./wager-service";
 import bodyParser from 'body-parser';
-import {SendRequest} from "@radar/lnrpc/types/lnrpc";
+import {SendRequest} from "@radar/lnrpc";
 import cors from "cors";
 import fundingTransaction, {FundingTransaction} from "./funding-transaction-service";
+import {TextEncoder} from "util";
+import base64 from "base64-js";
+import {sha256} from "js-sha256";
+import Long from "long";
+import axios from "axios";
+import * as fs from "fs";
+import * as crypto from "crypto";
+
 
 
 
@@ -15,7 +23,6 @@ import fundingTransaction, {FundingTransaction} from "./funding-transaction-serv
 const app = express();
 app.use(bodyParser.json());
 app.use(cors({ origin: '*' }));
-
 
 
 
@@ -64,9 +71,6 @@ app.put('/api/wager', async (req, res, next) => {
       const { id, name, email, walletBalance } = req.body;
       let wager = wagerService.getWagerById(id);
       if(wager){
-          if (!name || !email) {
-              throw new Error('Fields name and email are required to make a wager');
-          }
           let wagerResponse = wagerService.updateWager(wager.id, name, email, walletBalance);
           res.json({ data: wagerResponse });
       }else {
@@ -210,22 +214,30 @@ app.get('/api/:wagerId/wallet-funding', (req, res) => {
     res.json({ data: fundingTrans });
 });
 
+app.get('/api/wallet-funding/:transactionId', (req, res) => {
+    const transactionId = parseInt(req.params.transactionId)
+    let fundingTrans = fundingTransaction.getFundingTransactionById(transactionId);
+    res.json({ data: fundingTrans });
+});
+
 
 app.post("/api/wager/:wagerId/fund-wallet", async function (req, res, next) {
     try{
         const  wagerId = parseInt(req.params.wagerId);
-        const { amount } = req.body;
+        const { amount, amountToWin } = req.body;
 
         // validate that a invoice hash was provided
         if (!amount) throw new Error('amount is required');
+        if (!amountToWin) throw new Error('amountToWin is required');
         let wager = wagerService.getWagerById(wagerId);
         if (!wager) throw new Error('Wager not found');
-        const {paymentRequest, rHash} = await node.addInvoice({value: '1', memo: 'Test BetJay invoice', expiry: '180'});
+        const {paymentRequest, rHash} = await node.addInvoice({value: amount, memo: 'BetJay invoice', expiry: '180'});
         const strHash = (rHash as Buffer).toString('base64')
         if(paymentRequest && strHash){
             console.log(">>> ", paymentRequest)
             const fundingTrans = <FundingTransaction> {
                 amount: amount,
+                amountToWin: amountToWin,
                 hash: strHash,
                 wagerId: wagerId,
                 isPaid: false
@@ -257,6 +269,60 @@ app.get('/api/fund-wallet/query', async (req, res, next) => {
     } catch(err) {
         next(err);
     }
+});
+
+app.get('/api/keysend', async (req, res, next) => {
+    try{
+        // let {hash} = req.body;
+
+
+
+//KEYSEND WITH REST
+        const macaroon = fs.readFileSync('/Users/omoniyiilesanmi/.polar/networks/1/volumes/lnd/dave/data/chain/bitcoin/regtest/admin.macaroon').toString('hex');
+
+        const preImage = crypto.randomBytes(32).toString("hex");
+
+        let preImageB64 =  Buffer.from(preImage, "hex").toString('base64');
+
+        const pubKey = "02a0c076d510f0d22f1aee8c0a01e0eed2f80c5bcf99bcb68c3f2dddcd9b454ba0"
+        let pubKeyB64 =  Buffer.from(pubKey, "hex").toString('base64');
+
+        let paymentHashHexDump =  Buffer.from(preImage, "hex");
+        var hash = sha256.create();
+        hash.update(paymentHashHexDump);
+        let paymentHashB64 = Buffer.from(hash.hex(), 'hex').toString('base64')
+        console.log(">>>>>3", paymentHashB64)
+
+        await axios.post('https://localhost:8085/v1/channels/transactions',
+            {
+                dest: pubKeyB64,
+                amt: "100",
+                payment_hash: paymentHashB64,
+                dest_custom_records: {"5482373484": preImageB64}
+            }, {
+            headers: {
+                'Grpc-Metadata-macaroon': macaroon
+            }
+        }).then(paymentresponse => {
+            console.log("????????", paymentresponse)
+        }).catch((err) => {
+            console.log("-----------", err)
+        });
+
+        console.log("=======================================")
+        res.send({
+            payreq: "hey",
+            // hash: (inv.rHash as Buffer).toString('base64'),
+        });
+
+    } catch(err) {
+        console.log(">>>>>>>>>>>>>>>>>>>3")
+        next(err);
+    }
+});
+
+app.get('/api/funding-transactions', (req, res) => {
+    res.json({ data: fundingTransaction.getAllFundingTransactions() });
 });
 
 

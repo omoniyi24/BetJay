@@ -4,7 +4,6 @@ import {LnRpc} from "@radar/lnrpc";
 import {NodeEvents} from "./node-manager";
 import {node} from "./node";
 import {response} from "express";
-const cron = require('node-cron');
 import wagerService, {WagerService} from "./wager-service";
 
 
@@ -14,6 +13,7 @@ const DB_FILE = '../db.json';
 export interface FundingTransaction {
     id: number;
     amount: number;
+    amountToWin: number;
     hash: string;
     wagerId: number;
     isPaid: boolean;
@@ -57,6 +57,10 @@ export class FundingTransaction extends EventEmitter {
         return this.getAllFundingTransactions().find(fundingTransaction => fundingTransaction.wagerId === wagerId);
     }
 
+    getFundingTransactionByNotPaid() {
+        return this.getAllFundingTransactions().filter(fundingTransaction => !fundingTransaction.isPaid);
+    }
+
 
     async addFundingTransaction(fundingTransaction: FundingTransaction) {
         const maxId = Math.max(0, ...this._data.fundingTransactions.map(p => p.id));
@@ -79,6 +83,16 @@ export class FundingTransaction extends EventEmitter {
         this.emit(FundingTransactionEvents.updated, transaction);
     }
 
+    async updateFundingTransactionPaid(wagerId: number) {
+        const transaction = this._data.fundingTransactions.find(p => p.wagerId === wagerId);
+        if (!transaction) {
+            throw new Error('Transaction not found');
+        }
+        transaction.isPaid = true
+        await this.persist();
+        this.emit(FundingTransactionEvents.updated, transaction);
+    }
+
     async queryInvoice(hash: string){
         try{
             // find the node that made this Employee
@@ -94,7 +108,7 @@ export class FundingTransaction extends EventEmitter {
 
     async autoQueryInvoice(){
         try{
-            let allTransaction = this.getAllFundingTransactions();
+            let allTransaction = this.getFundingTransactionByNotPaid();
             for (let i = 0; i < allTransaction.length; i++) {
                 let fundingTrans = allTransaction[i];
                 const rHash = Buffer.from(fundingTrans.hash, 'base64');
@@ -141,7 +155,7 @@ export class FundingTransaction extends EventEmitter {
 
 let fundingTransaction = new FundingTransaction();
 export default fundingTransaction;
-cron.schedule("1 * * * * *", () => {
-    console.log("Minute Cron Job Start");
-    fundingTransaction.autoQueryInvoice()
-});
+// cron.schedule("1 * * * * *", () => {
+//     console.log("Minute Cron Job Start");
+//     fundingTransaction.autoQueryInvoice()
+// });

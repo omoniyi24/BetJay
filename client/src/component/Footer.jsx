@@ -3,38 +3,23 @@ import axios from 'axios'
 
 
 
- const handlePlaceBet = (horses, handleDisplay, maxReturn, walletAmount) => {
+ const handlePlaceBet = (horses, handleDisplay, maxReturn, handleWinningBalance, winningBalance, handleIsBetPlaced, totalBet, handleEvent) => {
+             axios.post('http://localhost:3001/api/wager/1/fund-wallet', {
+                 amount: totalBet,
+                 amountToWin: calcProfit(horses)
+             }).then(paymentresponse => {
+                 console.log("[+]", paymentresponse.data);
+                 handleDisplay(paymentresponse.data.payreq)
+             }).catch((err) => {
+                 console.log(err)
+             });
 
-    if(walletAmount >= 5){
-
-        if(horses[2].amount >= 10 || horses[0].amount >= 10){
-
-            axios.get('http://localhost:3001/api/wager/1/invoice/'+maxReturn).then(response => {
-                if(response.data.payreq && response.data.hash){
-                    axios.post('http://localhost:3001/api/wager/1/pay-invoice', {
-                        payment_request: response.data.payreq
-                    }).then(paymentresponse => {
-                        console.log( paymentresponse.data);
-                    }).catch((err) => {
-                        console.log(err)
-                    });
-                }
-                handleDisplay("Invoice: " + response.data.payreq)
-            }).catch((err) => {
-                console.log(err)
-            });
-            handleDisplay( "Bet Won!!!")
-        } else {
-            handleDisplay( "Bet Lose!!!")
-        }
-    } else {
-        handleDisplay( "Insufficient Fund!!!")
-    }
-
-
+     handleEvent(winningBalance)
  }
 
-function Footer({horses, handleDisplay, walletAmount}) {
+
+
+function Footer({horses, handleDisplay, handleWinningBalance, winningBalance, handleIsBetPlaced, handleEvent}) {
     let profit = calcProfit(horses);
     let totalBet = calcBet(horses);
     return (
@@ -51,7 +36,7 @@ function Footer({horses, handleDisplay, walletAmount}) {
                     <div>Total Bet Amount</div>
                     <div className="total">{totalBet} sats</div>
                 </div>
-                <button onClick={() => {if (totalBet >= 5) {handlePlaceBet(horses, handleDisplay, profit, walletAmount)}}}> Place Bet </button>
+                <button onClick={() => {if (totalBet >= 5) {handlePlaceBet(horses, handleDisplay, profit, handleWinningBalance, winningBalance, handleIsBetPlaced, totalBet, handleEvent)}}}> Place Bet </button>
             </div>
         </div>
     );
