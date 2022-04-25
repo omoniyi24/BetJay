@@ -14,6 +14,8 @@ import {sha256} from "js-sha256";
 import Long from "long";
 import axios from "axios";
 import * as fs from "fs";
+import * as crypto from "crypto";
+
 
 
 
@@ -21,7 +23,6 @@ import * as fs from "fs";
 const app = express();
 app.use(bodyParser.json());
 app.use(cors({ origin: '*' }));
-
 
 
 
@@ -213,22 +214,30 @@ app.get('/api/:wagerId/wallet-funding', (req, res) => {
     res.json({ data: fundingTrans });
 });
 
+app.get('/api/wallet-funding/:transactionId', (req, res) => {
+    const transactionId = parseInt(req.params.transactionId)
+    let fundingTrans = fundingTransaction.getFundingTransactionById(transactionId);
+    res.json({ data: fundingTrans });
+});
+
 
 app.post("/api/wager/:wagerId/fund-wallet", async function (req, res, next) {
     try{
         const  wagerId = parseInt(req.params.wagerId);
-        const { amount } = req.body;
+        const { amount, amountToWin } = req.body;
 
         // validate that a invoice hash was provided
         if (!amount) throw new Error('amount is required');
+        if (!amountToWin) throw new Error('amountToWin is required');
         let wager = wagerService.getWagerById(wagerId);
         if (!wager) throw new Error('Wager not found');
-        const {paymentRequest, rHash} = await node.addInvoice({value: '1', memo: 'Test BetJay invoice', expiry: '180'});
+        const {paymentRequest, rHash} = await node.addInvoice({value: amount, memo: 'BetJay invoice', expiry: '180'});
         const strHash = (rHash as Buffer).toString('base64')
         if(paymentRequest && strHash){
             console.log(">>> ", paymentRequest)
             const fundingTrans = <FundingTransaction> {
                 amount: amount,
+                amountToWin: amountToWin,
                 hash: strHash,
                 wagerId: wagerId,
                 isPaid: false
@@ -266,45 +275,30 @@ app.get('/api/keysend', async (req, res, next) => {
     try{
         // let {hash} = req.body;
 
-        // let request = <SendRequest> {
-        //     dest: Buffer.from("02a0c076d510f0d22f1aee8c0a01e0eed2f80c5bcf99bcb68c3f2dddcd9b454ba0", "hex"),
-        //     destString: "02a0c076d510f0d22f1aee8c0a01e0eed2f80c5bcf99bcb68c3f2dddcd9b454ba0",
-        //     amt: "110",
-        //     allowSelfPayment: true,
-        //     destCustomRecords: [[5482373484, Buffer.from("preimage")]]
-        // }
-        // node.sendPaymentSync(request);
 
-        var hash = sha256.create();
 
-        // let preImage = Buffer.from("abfa68d1d1f018d8301f69992f5415cbf08242365d3e06ec94870491e37d80e7", "hex");
-        // hash.update(preImage);
-        // let paymentHash = hash.hex();
-        // console.log(">>>>>", paymentHash)
-
-        const pubKey = "02a0c076d510f0d22f1aee8c0a01e0eed2f80c5bcf99bcb68c3f2dddcd9b454ba0"
-        // let preimage = new TextEncoder().encode("abfa68d1d1f018d8301f69992f5415cbf08242365d3e06ec94870491e37d80e7");
-        let message = "48617070792047656E6573697320426C6F636B2044617921";
-        let buffer =  Buffer.from("5482373484");
-        buffer.readBigUInt64BE(0);
-
-        var destCustomRecords = {
-            5482373484:"NDg2MTcwNzA3OTIwNDc2NTZFNjU3MzY5NzMyMDQyNkM2RjYzNkIyMDQ0NjE3OTIx"
-        }
-
+//KEYSEND WITH REST
         const macaroon = fs.readFileSync('/Users/omoniyiilesanmi/.polar/networks/1/volumes/lnd/dave/data/chain/bitcoin/regtest/admin.macaroon').toString('hex');
 
-        let preImage = Buffer.from("abfa68d1d1f018d8301f69992f5415cbf08242365d3e06ec94870491e37d80e7", "hex");
-        hash.update(preImage);
-        let paymentHash = hash.hex();
-        console.log(">>>>>", paymentHash)
+        const preImage = crypto.randomBytes(32).toString("hex");
+
+        let preImageB64 =  Buffer.from(preImage, "hex").toString('base64');
+
+        const pubKey = "02a0c076d510f0d22f1aee8c0a01e0eed2f80c5bcf99bcb68c3f2dddcd9b454ba0"
+        let pubKeyB64 =  Buffer.from(pubKey, "hex").toString('base64');
+
+        let paymentHashHexDump =  Buffer.from(preImage, "hex");
+        var hash = sha256.create();
+        hash.update(paymentHashHexDump);
+        let paymentHashB64 = Buffer.from(hash.hex(), 'hex').toString('base64')
+        console.log(">>>>>3", paymentHashB64)
 
         await axios.post('https://localhost:8085/v1/channels/transactions',
             {
-                dest: "AqDAdtUQ8NIvGu6MCgHg7tL4DFvPmby2jD8t3c2bRUug",
-                amt: "20",
-                // preImage: "q/po0dHwGNgwH2mZL1QVy/CCQjZdPgbslIcEkeN9gOc=",
-                payment_hash: "q/po0dHwGNgwH2mZL1QVy/CCQjZdPgbslIcEkeN9gOc="
+                dest: pubKeyB64,
+                amt: "100",
+                payment_hash: paymentHashB64,
+                dest_custom_records: {"5482373484": preImageB64}
             }, {
             headers: {
                 'Grpc-Metadata-macaroon': macaroon
@@ -316,27 +310,6 @@ app.get('/api/keysend', async (req, res, next) => {
         });
 
         console.log("=======================================")
-
-
-        // let request = <SendRequest> {
-        //     dest: Buffer.from(pubKey, "hex"),
-        //     amt: '100',
-        //     destCustomRecords: [[34349334, Buffer.from(message)]]
-            // new Long(0xFFFFFFFF, 0x7FFFFFFF);
-            // destCustomRecords: [[ 5482373487, Buffer.from(msg)]]
-            // destCustomRecords: [[getBuffer(), Buffer.from(message)]]
-        // }
-        // console.log(">>>>>>>>>>>>>>>>>>>1")
-        // let sendResponsePromise = node.sendPaymentSync(request);
-        // call.then((response) => {
-        //     console.log("new===========", response)
-        // }).catch((err) => {
-        //     console.log("error===========", err)
-        // })
-        // console.log(">>>>>>>>>>>>>>>>>>>2", call)
-
-
-        // const inv = await node.addInvoice({ value: "20", isKeysend: true });
         res.send({
             payreq: "hey",
             // hash: (inv.rHash as Buffer).toString('base64'),
@@ -348,14 +321,10 @@ app.get('/api/keysend', async (req, res, next) => {
     }
 });
 
+app.get('/api/funding-transactions', (req, res) => {
+    res.json({ data: fundingTransaction.getAllFundingTransactions() });
+});
 
-function getBuffer (size: any, byte: any) {
-    const endian = 'le'
-    const data = new Uint8Array(size)
-    data.fill(byte)
-    return Buffer.from(data)
-    // return Long.fromBytes(buf, true, endian==='le').toNumber()
-}
 
 // Initialize node & server
 console.log('Initializing Lightning node...');

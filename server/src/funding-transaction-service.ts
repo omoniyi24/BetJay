@@ -4,7 +4,6 @@ import {LnRpc} from "@radar/lnrpc";
 import {NodeEvents} from "./node-manager";
 import {node} from "./node";
 import {response} from "express";
-const cron = require('node-cron');
 import wagerService, {WagerService} from "./wager-service";
 
 
@@ -14,6 +13,7 @@ const DB_FILE = '../db.json';
 export interface FundingTransaction {
     id: number;
     amount: number;
+    amountToWin: number;
     hash: string;
     wagerId: number;
     isPaid: boolean;
@@ -79,6 +79,16 @@ export class FundingTransaction extends EventEmitter {
         if (!wager) {
             throw new Error('Wager not found');
         }
+        await this.persist();
+        this.emit(FundingTransactionEvents.updated, transaction);
+    }
+
+    async updateFundingTransactionPaid(wagerId: number) {
+        const transaction = this._data.fundingTransactions.find(p => p.wagerId === wagerId);
+        if (!transaction) {
+            throw new Error('Transaction not found');
+        }
+        transaction.isPaid = true
         await this.persist();
         this.emit(FundingTransactionEvents.updated, transaction);
     }

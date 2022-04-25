@@ -54,6 +54,39 @@ h1 {
     border-radius: 30px;
 }
 
+.input-group {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*border: 1px solid #ccc;*/
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.btn {
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    width: 100px;
+    height: 40px;
+    cursor: pointer;
+}
+
+
+.btn-primary {
+    background-color: green;
+}
+
+.btn-secondary {
+    background: #ff6a95;
+}
+
+.btn:disabled {
+    background-color: #cccccc;
+    color: #333;
+    cursor: auto;
+}
+
 .bet-container {
     width: 95%;
     padding: 10px;
