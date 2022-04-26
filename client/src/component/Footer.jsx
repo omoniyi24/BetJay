@@ -3,23 +3,21 @@ import axios from 'axios'
 
 
 
- const handlePlaceBet = (horses, handleDisplay, maxReturn, handleWinningBalance, winningBalance, handleIsBetPlaced, totalBet, handleEvent) => {
+ const handlePlaceBet = (horses, handleDisplay, maxReturn, handleIsBetPlaced, totalBet, handleFundingTransactionId) => {
              axios.post('http://localhost:3001/api/wager/1/fund-wallet', {
                  amount: totalBet,
                  amountToWin: calcProfit(horses)
              }).then(paymentresponse => {
-                 console.log("[+]", paymentresponse.data);
+                 handleFundingTransactionId(paymentresponse.data.fundingTransactionId)
                  handleDisplay(paymentresponse.data.payreq)
              }).catch((err) => {
                  console.log(err)
              });
-
-     handleEvent(winningBalance)
  }
 
 
 
-function Footer({horses, handleDisplay, handleWinningBalance, winningBalance, handleIsBetPlaced, handleEvent}) {
+function Footer({horses, handleDisplay, handleIsBetPlaced, handleFundingTransactionId}) {
     let profit = calcProfit(horses);
     let totalBet = calcBet(horses);
     return (
@@ -36,7 +34,7 @@ function Footer({horses, handleDisplay, handleWinningBalance, winningBalance, ha
                     <div>Total Bet Amount</div>
                     <div className="total">{totalBet} sats</div>
                 </div>
-                <button onClick={() => {if (totalBet >= 5) {handlePlaceBet(horses, handleDisplay, profit, handleWinningBalance, winningBalance, handleIsBetPlaced, totalBet, handleEvent)}}}> Place Bet </button>
+                <button onClick={() => {if (totalBet >= 5) {handlePlaceBet(horses, handleDisplay, profit, handleIsBetPlaced, totalBet, handleFundingTransactionId)}}}> Place Bet </button>
             </div>
         </div>
     );
