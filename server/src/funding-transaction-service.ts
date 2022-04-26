@@ -5,6 +5,9 @@ import {NodeEvents} from "./node-manager";
 import {node} from "./node";
 import {response} from "express";
 import wagerService, {WagerService} from "./wager-service";
+import crypto from "crypto";
+import {sha256} from "js-sha256";
+import axios from "axios";
 
 
 
@@ -17,6 +20,7 @@ export interface FundingTransaction {
     hash: string;
     wagerId: number;
     isPaid: boolean;
+    isCompleted: boolean;
 }
 
 export interface DbData {
@@ -53,6 +57,14 @@ export class FundingTransaction extends EventEmitter {
         return this.getAllFundingTransactions().find(fundingTransaction => fundingTransaction.hash === hash);
     }
 
+    getFundingTransactionByHashAndNotPaid(hash: string) {
+        let fundingTransaction = this.getAllFundingTransactions().find(fundingTransaction => fundingTransaction.hash === hash);
+        if(fundingTransaction && !fundingTransaction.isPaid){
+            console.log("-----------", fundingTransaction)
+            return fundingTransaction;
+        }
+    }
+
     getFundingTransactionByWagerId(wagerId: number) {
         return this.getAllFundingTransactions().find(fundingTransaction => fundingTransaction.wagerId === wagerId);
     }
@@ -72,6 +84,7 @@ export class FundingTransaction extends EventEmitter {
             ...this._data.fundingTransactions.filter(n => n.id !== fundingTransaction.id),
         ];
         await this.persist();
+        return fundingTransaction;
     }
 
     async updateFundingTransaction(transaction: FundingTransaction) {
@@ -89,6 +102,16 @@ export class FundingTransaction extends EventEmitter {
             throw new Error('Transaction not found');
         }
         transaction.isPaid = true
+        await this.persist();
+        this.emit(FundingTransactionEvents.updated, transaction);
+    }
+
+    async updateFundingTransactionStatus(transId: number, status: boolean) {
+        const transaction = this._data.fundingTransactions.find(p => p.id === transId);
+        if (!transaction) {
+            throw new Error('Transaction not found');
+        }
+        transaction.isCompleted = status
         await this.persist();
         this.emit(FundingTransactionEvents.updated, transaction);
     }

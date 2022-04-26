@@ -15,10 +15,6 @@ const io = new Server(4000, {
 })
 
 
-
-
-
-
 export let node: LnRpc;
 
 export async function initNode() {
@@ -28,8 +24,12 @@ export async function initNode() {
     macaroon: new Buffer(env.LND_MACAROON, 'base64').toString('hex'),
   });
 
+  let emitSocketEvent: any;
+
   io.on('connection', (socket:any) => {
     console.log('A user connected');
+    emitSocketEvent = socket;
+  });
 
     const stream = node.subscribeInvoices();
     stream.on('data', invoice => {
@@ -37,7 +37,8 @@ export async function initNode() {
         const hash = (invoice.rHash as Buffer).toString('base64');
         const amount = invoice.amtPaidSat;
         let fundingTransactionByHash = fundingTransaction.getFundingTransactionByHash(hash);
-        if (fundingTransactionByHash){
+        if (fundingTransactionByHash && !fundingTransactionByHash.isPaid){
+          console.log('Invoice Has Been Paid......');
           fundingTransactionByHash.isPaid = true
           let wagerById = wagerService.getWagerById(fundingTransactionByHash.wagerId);
           if(wagerById){
@@ -45,15 +46,14 @@ export async function initNode() {
             wagerService.updateWager(wagerById.id, wagerById.name, wagerById.email, walletBalance)
             fundingTransaction.updateFundingTransactionPaid(wagerById.id)
             if (wagerById){
-              let data = {paid: true, amount: amount}
-              socket.emit("data", JSON.stringify(data));
+              let data = {paid: true, amount: amount, fundingTransactionId: fundingTransactionByHash.id, isCompleted: fundingTransactionByHash.isCompleted}
+              console.log('Emitting Socket......', data);
+              emitSocketEvent.emit("paymentInfo", JSON.stringify(data));
             }
           }
         }
-        console.log('Invoice Has Been Paid......');
       }
     });
-  });
 
 
 }

@@ -8,6 +8,7 @@ export interface Wager {
     name: string;
     email: string;
     walletBalance: number;
+    publicKey: string;
 }
 
 export interface DbData {
@@ -40,10 +41,10 @@ export class WagerService extends EventEmitter {
         return this.getAllWagers().find(wager => wager.id === wagerId);
     }
 
-    async createWager(name: string, email: string) {
+    async createWager(name: string, email: string, publicKey: string) {
         const maxId = Math.max(0, ...this._data.wagers.map(p => p.id));
 
-        const wager: Wager = {id: maxId + 1, name: name, email: email, walletBalance: 0};
+        const wager: Wager = {id: maxId + 1, name: name, email: email, walletBalance: 0, publicKey: publicKey};
         this._data.wagers.push(wager);
 
         await this.persist();
