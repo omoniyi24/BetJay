@@ -6,7 +6,7 @@ BetJay is a betting application built fully on the Lightning Network.
 ![demo](./image/landingpage.jpeg)
 
 BetJay focuses on user privacy and ease of payment. It connects to an existing lightning node (service company node) to exchange
-bitcoin (in satoshi) between the gambler and the service company based on win or lose.
+bitcoin (in satoshi) between the gambler and the service company based on whether they win or lose.
 
 ## Features
 
